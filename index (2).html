@@ -86,7 +86,15 @@
         }
     </style>
 </head>
-<body>
+<button id="arButton" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 10px 15px; background: #007bff; color: white; border:none; border-radius:5px; cursor:pointer;">
+  جرب الـ AR
+</button>
+<script>
+  document.getElementById('arButton').addEventListener('click', () => {
+    window.open('interactive-ar.html', '_blank');
+  });
+</script>
+    <body>
     <header>
         <img src="profile.jpg" alt="Profile" />
         💬 محاكاة الأمن السيبراني
