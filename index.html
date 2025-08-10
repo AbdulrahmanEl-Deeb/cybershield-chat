@@ -17,68 +17,73 @@
       background-color: #075E54;
       color: white;
       padding: 15px;
-      font-size: 1.2em;
+      font-size: 1.5em; /* حجم أكبر */
       text-align: center;
       display: flex;
       align-items: center;
       gap: 10px;
     }
     header img {
-      width: 35px;
-      height: 35px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
     }
     .chat {
       display: flex;
       flex-direction: column;
-      padding: 20px;
-      max-width: 500px;
+      padding: 30px;
+      max-width: 600px;
       margin: auto;
     }
     .message {
       background-color: #dcf8c6;
-      padding: 10px 15px;
-      border-radius: 10px;
-      margin: 5px 0;
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin: 10px 0;
       max-width: 75%;
       align-self: flex-start;
-      box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+      font-size: 20px; /* حجم الخط هنا */
+      line-height: 1.4;
     }
     .reply {
       background-color: #34b7f1;
       color: white;
-      padding: 10px 15px;
-      border-radius: 10px;
-      margin: 5px 0;
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin: 10px 0;
       max-width: 75%;
       align-self: flex-end;
-      box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+      font-size: 20px; /* حجم الخط هنا */
+      line-height: 1.4;
     }
     .options button, .next-btn {
       background: #25D366;
       color: white;
-      padding: 10px 15px;
-      margin: 5px;
+      padding: 15px 20px;
+      margin: 10px 5px 0 5px;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
+      font-size: 18px; /* حجم الخط في الأزرار */
+      transition: background-color 0.3s ease;
     }
     .options button:hover, .next-btn:hover {
       background: #1DA851;
     }
-    /* زرار AR ثابت في الركن السفلي يمين */
     #arButton {
       position: fixed;
       bottom: 20px;
       right: 20px;
       z-index: 9999;
-      padding: 12px 20px;
+      padding: 15px 25px;
       background: #007bff;
       color: white;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 18px;
       box-shadow: 0 4px 8px rgba(0,123,255,0.5);
       transition: background-color 0.3s ease;
     }
@@ -103,7 +108,6 @@
     <button class="next-btn" id="nextBtn" style="display:none;" onclick="loadNextScenario()">➡ الاختبار التالي</button>
   </div>
 
-  <!-- زرار تجربة AR -->
   <button id="arButton">جرب الـ AR</button>
 
   <script>
@@ -156,7 +160,6 @@
 
     showScenario();
 
-    // فتح صفحة AR عند الضغط على الزر
     document.getElementById('arButton').addEventListener('click', function () {
       window.open('interactive-ar.html', '_blank');
     });
