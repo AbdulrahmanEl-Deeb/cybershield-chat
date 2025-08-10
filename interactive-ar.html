@@ -19,7 +19,7 @@
       top: 10px;
       width: 100%;
       z-index: 10;
-      font-size: 18px;
+      font-size: 20px;
       background: rgba(0,0,0,0.5);
       padding: 10px 0;
     }
@@ -31,7 +31,6 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/webxr/ARButton.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/FontLoader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/fonts/helvetiker_regular.typeface.json"></script>
 
   <script>
     let scene, camera, renderer;
@@ -60,34 +59,36 @@
       // تحميل الخط
       const loader = new THREE.FontLoader();
       loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font) {
-        // نص الإشعار
+        // نص الإشعار - حجم أكبر
         const textGeometry = new THREE.TextGeometry('⚠️ فتح الرابط؟ اضغط هنا', {
           font: font,
-          size: 0.05,
-          height: 0.01,
+          size: 0.12,   // حجم أكبر
+          height: 0.02,
+          curveSegments: 12,
         });
         const textMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
         notification = new THREE.Mesh(textGeometry, textMaterial);
-        notification.position.set(0, 0, -0.5);
+        notification.position.set(-0.5, 0, -1);  // في النص والأمام أكثر
         scene.add(notification);
 
-        // علامة ✖️
+        // علامة ✖️ - أكبر
         const crossGeometry = new THREE.TextGeometry('✖', {
           font: font,
-          size: 0.15,
-          height: 0.01,
+          size: 0.25,
+          height: 0.02,
+          curveSegments: 12,
         });
         const crossMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
         crossMark = new THREE.Mesh(crossGeometry, crossMaterial);
-        crossMark.position.set(0, 0, -0.5);
+        crossMark.position.set(-0.1, 0, -1);
         crossMark.visible = false;
         scene.add(crossMark);
 
         // الدرع الأزرق (مجسم كرة شفافة)
-        const shieldGeometry = new THREE.SphereGeometry(0.15, 32, 32);
+        const shieldGeometry = new THREE.SphereGeometry(0.25, 32, 32);
         const shieldMaterial = new THREE.MeshBasicMaterial({color: 0x0000ff, opacity: 0.6, transparent: true});
         shield = new THREE.Mesh(shieldGeometry, shieldMaterial);
-        shield.position.set(0, 0, -0.5);
+        shield.position.set(0, 0, -1);
         shield.visible = false;
         scene.add(shield);
       });
