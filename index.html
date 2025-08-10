@@ -16,57 +16,57 @@
     header {
       background-color: #075E54;
       color: white;
-      padding: 15px;
-      font-size: 1.5em; /* حجم أكبر */
+      padding: 20px;
+      font-size: 2em; /* كبرت الخط */
       text-align: center;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 15px;
     }
     header img {
-      width: 40px;
-      height: 40px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
     }
     .chat {
       display: flex;
       flex-direction: column;
-      padding: 30px;
-      max-width: 600px;
+      padding: 40px;
+      max-width: 700px;
       margin: auto;
     }
     .message {
       background-color: #dcf8c6;
-      padding: 15px 20px;
-      border-radius: 12px;
-      margin: 10px 0;
+      padding: 20px 25px;
+      border-radius: 15px;
+      margin: 15px 0;
       max-width: 75%;
       align-self: flex-start;
-      box-shadow: 0 2px 3px rgba(0,0,0,0.2);
-      font-size: 20px; /* حجم الخط هنا */
-      line-height: 1.4;
+      box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+      font-size: 28px; /* كبرت الخط جداً */
+      line-height: 1.5;
     }
     .reply {
       background-color: #34b7f1;
       color: white;
-      padding: 15px 20px;
-      border-radius: 12px;
-      margin: 10px 0;
+      padding: 20px 25px;
+      border-radius: 15px;
+      margin: 15px 0;
       max-width: 75%;
       align-self: flex-end;
-      box-shadow: 0 2px 3px rgba(0,0,0,0.2);
-      font-size: 20px; /* حجم الخط هنا */
-      line-height: 1.4;
+      box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+      font-size: 28px; /* كبرت الخط جداً */
+      line-height: 1.5;
     }
     .options button, .next-btn {
       background: #25D366;
       color: white;
-      padding: 15px 20px;
-      margin: 10px 5px 0 5px;
+      padding: 20px 30px;
+      margin: 15px 7px 0 7px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 18px; /* حجم الخط في الأزرار */
+      font-size: 22px; /* أكبر في الأزرار */
       transition: background-color 0.3s ease;
     }
     .options button:hover, .next-btn:hover {
@@ -74,17 +74,17 @@
     }
     #arButton {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
+      bottom: 25px;
+      right: 25px;
       z-index: 9999;
-      padding: 15px 25px;
+      padding: 18px 35px;
       background: #007bff;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
-      font-size: 18px;
-      box-shadow: 0 4px 8px rgba(0,123,255,0.5);
+      font-size: 22px;
+      box-shadow: 0 5px 10px rgba(0,123,255,0.6);
       transition: background-color 0.3s ease;
     }
     #arButton:hover {
@@ -104,7 +104,7 @@
       <button onclick="handleChoice(false)">اضغط على الرابط</button>
     </div>
   </div>
-  <div style="text-align:center; margin: 20px;">
+  <div style="text-align:center; margin: 30px;">
     <button class="next-btn" id="nextBtn" style="display:none;" onclick="loadNextScenario()">➡ الاختبار التالي</button>
   </div>
 
