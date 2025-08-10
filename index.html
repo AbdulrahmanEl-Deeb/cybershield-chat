@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CyberShield Chat Simulation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e5ddd5;
+      margin: 0;
+      padding: 0;
+      background-image: url('whatsapp-bg.jpeg');
+      background-size: cover;
+    }
+    header {
+      background-color: #075E54;
+      color: white;
+      padding: 15px;
+      font-size: 1.2em;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    header img {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+    }
+    .chat {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+    }
+    .message {
+      background-color: #dcf8c6;
+      padding: 10px 15px;
+      border-radius: 10px;
+      margin: 5px 0;
+      max-width: 75%;
+      align-self: flex-start;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+    }
+    .reply {
+      background-color: #34b7f1;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 10px;
+      margin: 5px 0;
+      max-width: 75%;
+      align-self: flex-end;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+    }
+    .options button, .next-btn {
+      background: #25D366;
+      color: white;
+      padding: 10px 15px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .options button:hover, .next-btn:hover {
+      background: #1DA851;
+    }
+    /* زرار AR ثابت في الركن السفلي يمين */
+    #arButton {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      padding: 12px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      box-shadow: 0 4px 8px rgba(0,123,255,0.5);
+      transition: background-color 0.3s ease;
+    }
+    #arButton:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="profile.jpg" alt="Profile" />
+    💬 محاكاة الأمن السيبراني
+  </header>
+  <div class="chat" id="chatBox">
+    <div id="scenario" class="message"></div>
+    <div class="options" id="optionsBox">
+      <button onclick="handleChoice(true)">تجاهل الرسالة</button>
+      <button onclick="handleChoice(false)">اضغط على الرابط</button>
+    </div>
+  </div>
+  <div style="text-align:center; margin: 20px;">
+    <button class="next-btn" id="nextBtn" style="display:none;" onclick="loadNextScenario()">➡ الاختبار التالي</button>
+  </div>
+
+  <!-- زرار تجربة AR -->
+  <button id="arButton">جرب الـ AR</button>
+
+  <script>
+    let scenarios = [
+      "📩 وصلتك رسالة من البنك: 'تم تجميد حسابك، اضغط هنا لإعادة التفعيل'",
+      "📩 صديقك أرسل لك لينك لمسابقة تكسب فيها هاتف جديد مجانًا",
+      "📩 إشعار من فيسبوك: 'تم اختراق حسابك، اضغط هنا لتأمينه'",
+      "📩 بريد إلكتروني: 'فاتورة الكهرباء غير مدفوعة، ادفع الآن عبر الرابط'"
+    ];
+
+    function showScenario() {
+      if (scenarios.length === 0) {
+        document.getElementById("chatBox").innerHTML = '<div class="message">🎉 خلص الاختبار! أحسنت.</div>';
+        document.getElementById("nextBtn").style.display = 'none';
+        return;
+      }
+      let randomIndex = Math.floor(Math.random() * scenarios.length);
+      let selected = scenarios.splice(randomIndex, 1)[0];
+      document.getElementById("chatBox").innerHTML =
+        '<div id="scenario" class="message">' + selected + '</div>' +
+        '<div class="options" id="optionsBox">' +
+        '<button onclick="handleChoice(true)">تجاهل الرسالة</button>' +
+        '<button onclick="handleChoice(false)">اضغط على الرابط</button>' +
+        '</div>';
+    }
+
+    function handleChoice(isIgnore) {
+      const chatBox = document.getElementById("chatBox");
+      const optionsBox = document.getElementById("optionsBox");
+
+      optionsBox.style.display = 'none';
+
+      let reply = document.createElement("div");
+      reply.className = "reply";
+      reply.textContent = isIgnore ? "تجاهلت الرسالة" : "ضغطت على الرابط";
+      chatBox.appendChild(reply);
+
+      let systemMsg = document.createElement("div");
+      systemMsg.className = "message";
+      systemMsg.textContent = isIgnore ? "✔ صحيح! كانت محاولة احتيال." : "❌ خطأ! فتحت رابط احتيالي.";
+      chatBox.appendChild(systemMsg);
+
+      document.getElementById("nextBtn").style.display = 'inline-block';
+    }
+
+    function loadNextScenario() {
+      document.getElementById("nextBtn").style.display = 'none';
+      showScenario();
+    }
+
+    showScenario();
+
+    // فتح صفحة AR عند الضغط على الزر
+    document.getElementById('arButton').addEventListener('click', function () {
+      window.open('interactive-ar.html', '_blank');
+    });
+  </script>
+</body>
+</html>
