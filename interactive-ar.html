@@ -6,145 +6,172 @@
   <title>تجربة الواقع المعزز - CyberShield AR</title>
   <style>
     body, html {
-      margin: 0; padding: 0; overflow: hidden;
+      margin: 0; padding: 0; height: 100vh; width: 100vw;
+      display: flex; justify-content: center; align-items: center;
       font-family: Arial, sans-serif;
       background-color: #000;
       color: white;
-      text-align: center;
-      height: 100vh;
-      width: 100vw;
+      flex-direction: column;
+    }
+    #startAR {
+      padding: 25px 50px;
+      font-size: 28px;
+      border: none;
+      border-radius: 12px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,123,255,0.7);
+      transition: background-color 0.3s ease;
+    }
+    #startAR:hover {
+      background-color: #0056b3;
     }
     #info {
-      position: absolute;
-      top: 10px;
-      width: 100%;
-      z-index: 10;
-      font-size: 20px;
-      background: rgba(0,0,0,0.5);
-      padding: 10px 0;
+      margin-top: 20px;
+      font-size: 18px;
+      text-align: center;
+      max-width: 80vw;
+      line-height: 1.4;
+    }
+    canvas {
+      display: block;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1000;
     }
   </style>
 </head>
 <body>
-  <div id="info">اضغط زر "Start AR" لتشغيل الواقع المعزز، ثم اضغط على الشاشة لعرض التهديد.</div>
 
-  <!-- مكتبات Three.js و ARButton -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/webxr/ARButton.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/FontLoader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/geometries/TextGeometry.js"></script>
+<button id="startAR">ابدأ تجربة الواقع المعزز (Start AR)</button>
+<div id="info">اضغط على الشاشة بعد بدء التجربة لعرض التهديد أو الإشعارات.</div>
 
-  <script>
-    let camera, scene, renderer;
-    let controller;
-    let notification, crossMark, shield;
-    let notificationShown = true;
-    let info = document.getElementById('info');
+<script type="module">
+  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js';
+  import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/webxr/ARButton.js';
+  import { FontLoader } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/FontLoader.js';
+  import { TextGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/geometries/TextGeometry.js';
+
+  let camera, scene, renderer;
+  let controller;
+  let notification, crossMark, shield;
+  let notificationShown = true;
+  let started = false;
+  const info = document.getElementById('info');
+  const startButton = document.getElementById('startAR');
+
+  startButton.addEventListener('click', () => {
+    if (started) return;
+    started = true;
+    startButton.style.display = 'none';
+    info.textContent = 'قم بتوجيه الكاميرا واضغط على الشاشة لعرض الإشعار.';
 
     init();
     animate();
+  });
 
-    function init() {
-      scene = new THREE.Scene();
+  function init() {
+    scene = new THREE.Scene();
 
-      camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 20);
+    camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 20);
 
-      renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.xr.enabled = true;
-      document.body.appendChild(renderer.domElement);
+    renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.xr.enabled = true;
+    document.body.appendChild(renderer.domElement);
 
-      // زر تشغيل AR مع طلب الميزات اللازمة
-      document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] }));
+    document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] }));
 
-      const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-      scene.add(light);
+    const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+    scene.add(light);
 
-      // تحميل الخط لإنشاء نص 3D
-      const loader = new THREE.FontLoader();
-      loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font) {
-        // نص الإشعار (تهديد)
-        const textGeometry = new THREE.TextGeometry('⚠️ تهديد: افتح الرابط!', {
-          font: font,
-          size: 0.15,
-          height: 0.03,
-          curveSegments: 12,
-        });
-        const textMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
-        notification = new THREE.Mesh(textGeometry, textMaterial);
-        notification.position.set(-0.6, 0, -1);
-        scene.add(notification);
-
-        // علامة ✖️ خطأ
-        const crossGeometry = new THREE.TextGeometry('✖', {
-          font: font,
-          size: 0.3,
-          height: 0.03,
-          curveSegments: 12,
-        });
-        const crossMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
-        crossMark = new THREE.Mesh(crossGeometry, crossMaterial);
-        crossMark.position.set(-0.15, 0, -1);
-        crossMark.visible = false;
-        scene.add(crossMark);
-
-        // درع أزرق كدليل حماية
-        const shieldGeometry = new THREE.SphereGeometry(0.25, 32, 32);
-        const shieldMaterial = new THREE.MeshBasicMaterial({color: 0x0000ff, opacity: 0.6, transparent: true});
-        shield = new THREE.Mesh(shieldGeometry, shieldMaterial);
-        shield.position.set(0.15, 0, -1);
-        shield.visible = false;
-        scene.add(shield);
+    const loader = new FontLoader();
+    loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', (font) => {
+      // إشعار التحذير
+      const textGeo = new TextGeometry('⚠️ تهديد: افتح الرابط!', {
+        font: font,
+        size: 0.15,
+        height: 0.03,
+        curveSegments: 12,
       });
+      const textMat = new THREE.MeshBasicMaterial({color: 0xff0000});
+      notification = new THREE.Mesh(textGeo, textMat);
+      notification.position.set(-0.6, 0, -1);
+      scene.add(notification);
 
-      // تحكم اللمس
-      controller = renderer.xr.getController(0);
-      controller.addEventListener('select', onSelect);
-      scene.add(controller);
-
-      // بعد 7 ثواني لو ما اضغطتش يتحول للإشارة الآمنة (الدرع)
-      setTimeout(() => {
-        if(notificationShown) showShield();
-      }, 7000);
-
-      window.addEventListener('resize', onWindowResize, false);
-    }
-
-    function onWindowResize() {
-      camera.aspect = window.innerWidth/window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    function onSelect() {
-      if(notificationShown) {
-        showCrossMark();
-      }
-    }
-
-    function showCrossMark() {
-      notification.visible = false;
-      crossMark.visible = true;
-      shield.visible = false;
-      notificationShown = false;
-      info.textContent = '❌ ضغطت على الرابط! تم الكشف عن تهديد.';
-    }
-
-    function showShield() {
-      notification.visible = false;
+      // علامة ✖️ خطأ
+      const crossGeo = new TextGeometry('✖', {
+        font: font,
+        size: 0.3,
+        height: 0.03,
+        curveSegments: 12,
+      });
+      const crossMat = new THREE.MeshBasicMaterial({color: 0xff0000});
+      crossMark = new THREE.Mesh(crossGeo, crossMat);
+      crossMark.position.set(-0.15, 0, -1);
       crossMark.visible = false;
-      shield.visible = true;
-      notificationShown = false;
-      info.textContent = '🛡️ تم تجاهل التهديد، الحماية فعالة.';
-    }
+      scene.add(crossMark);
 
-    function animate() {
-      renderer.setAnimationLoop(render);
-    }
+      // درع أزرق
+      const shieldGeo = new THREE.SphereGeometry(0.25, 32, 32);
+      const shieldMat = new THREE.MeshBasicMaterial({color: 0x0000ff, opacity: 0.6, transparent: true});
+      shield = new THREE.Mesh(shieldGeo, shieldMat);
+      shield.position.set(0.15, 0, -1);
+      shield.visible = false;
+      scene.add(shield);
+    });
 
-    function render() {
-      renderer.render(scene, camera);
+    controller = renderer.xr.getController(0);
+    controller.addEventListener('select', onSelect);
+    scene.add(controller);
+
+    // بعد 7 ثواني لو ما ضغطتش يتحول للإشارة الآمنة
+    setTimeout(() => {
+      if(notificationShown) showShield();
+    }, 7000);
+
+    window.addEventListener('resize', onWindowResize, false);
+  }
+
+  function onWindowResize() {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  function onSelect() {
+    if(notificationShown) {
+      showCrossMark();
     }
-  </script>
+  }
+
+  function showCrossMark() {
+    notification.visible = false;
+    crossMark.visible = true;
+    shield.visible = false;
+    notificationShown = false;
+    info.textContent = '❌ ضغطت على الرابط! تم الكشف عن تهديد.';
+  }
+
+  function showShield() {
+    notification.visible = false;
+    crossMark.visible = false;
+    shield.visible = true;
+    notificationShown = false;
+    info.textContent = '🛡️ تم تجاهل التهديد، الحماية فعالة.';
+  }
+
+  function animate() {
+    renderer.setAnimationLoop(render);
+  }
+
+  function render() {
+    renderer.render(scene, camera);
+  }
+</script>
+
 </body>
 </html>
