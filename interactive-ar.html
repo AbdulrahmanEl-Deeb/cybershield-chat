@@ -3,144 +3,166 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>تجربة الواقع المعزز - CyberShield AR</title>
+  <title>CyberShield Chat Simulation</title>
   <style>
-    body, html {
-      margin: 0; padding: 0; overflow: hidden;
+    body {
       font-family: Arial, sans-serif;
-      background-color: #000;
-      color: white;
-      text-align: center;
-      height: 100vh;
-      width: 100vw;
+      background-color: #e5ddd5;
+      margin: 0;
+      padding: 0;
+      background-image: url('whatsapp-bg.jpeg');
+      background-size: cover;
     }
-    #info {
-      position: absolute;
-      top: 10px;
-      width: 100%;
-      z-index: 10;
-      font-size: 20px;
-      background: rgba(0,0,0,0.5);
-      padding: 10px 0;
+    header {
+      background-color: #075E54;
+      color: white;
+      padding: 15px;
+      font-size: 1.5em; /* حجم أكبر */
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+    .chat {
+      display: flex;
+      flex-direction: column;
+      padding: 30px;
+      max-width: 600px;
+      margin: auto;
+    }
+    .message {
+      background-color: #dcf8c6;
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin: 10px 0;
+      max-width: 75%;
+      align-self: flex-start;
+      box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+      font-size: 20px; /* حجم الخط هنا */
+      line-height: 1.4;
+    }
+    .reply {
+      background-color: #34b7f1;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin: 10px 0;
+      max-width: 75%;
+      align-self: flex-end;
+      box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+      font-size: 20px; /* حجم الخط هنا */
+      line-height: 1.4;
+    }
+    .options button, .next-btn {
+      background: #25D366;
+      color: white;
+      padding: 15px 20px;
+      margin: 10px 5px 0 5px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px; /* حجم الخط في الأزرار */
+      transition: background-color 0.3s ease;
+    }
+    .options button:hover, .next-btn:hover {
+      background: #1DA851;
+    }
+    #arButton {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      padding: 15px 25px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      box-shadow: 0 4px 8px rgba(0,123,255,0.5);
+      transition: background-color 0.3s ease;
+    }
+    #arButton:hover {
+      background-color: #0056b3;
     }
   </style>
 </head>
 <body>
-  <div id="info">اضغط على الشاشة لعرض الإشعار، انتظر أو تجاهل لعرض الدرع</div>
+  <header>
+    <img src="profile.jpg" alt="Profile" />
+    💬 محاكاة الأمن السيبراني
+  </header>
+  <div class="chat" id="chatBox">
+    <div id="scenario" class="message"></div>
+    <div class="options" id="optionsBox">
+      <button onclick="handleChoice(true)">تجاهل الرسالة</button>
+      <button onclick="handleChoice(false)">اضغط على الرابط</button>
+    </div>
+  </div>
+  <div style="text-align:center; margin: 20px;">
+    <button class="next-btn" id="nextBtn" style="display:none;" onclick="loadNextScenario()">➡ الاختبار التالي</button>
+  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/webxr/ARButton.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/FontLoader.js"></script>
+  <button id="arButton">جرب الـ AR</button>
 
   <script>
-    let scene, camera, renderer;
-    let controller;
-    let notification, crossMark, shield;
-    let notificationShown = true;
-    let ignoredTimeout;
+    let scenarios = [
+      "📩 وصلتك رسالة من البنك: 'تم تجميد حسابك، اضغط هنا لإعادة التفعيل'",
+      "📩 صديقك أرسل لك لينك لمسابقة تكسب فيها هاتف جديد مجانًا",
+      "📩 إشعار من فيسبوك: 'تم اختراق حسابك، اضغط هنا لتأمينه'",
+      "📩 بريد إلكتروني: 'فاتورة الكهرباء غير مدفوعة، ادفع الآن عبر الرابط'"
+    ];
 
-    init();
-    animate();
-
-    function init() {
-      scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 20);
-
-      renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.xr.enabled = true;
-      document.body.appendChild(renderer.domElement);
-
-      document.body.appendChild(ARButton.createButton(renderer));
-
-      const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-      scene.add(light);
-
-      // تحميل الخط
-      const loader = new THREE.FontLoader();
-      loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font) {
-        // نص الإشعار - حجم أكبر
-        const textGeometry = new THREE.TextGeometry('⚠️ فتح الرابط؟ اضغط هنا', {
-          font: font,
-          size: 0.12,   // حجم أكبر
-          height: 0.02,
-          curveSegments: 12,
-        });
-        const textMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
-        notification = new THREE.Mesh(textGeometry, textMaterial);
-        notification.position.set(-0.5, 0, -1);  // في النص والأمام أكثر
-        scene.add(notification);
-
-        // علامة ✖️ - أكبر
-        const crossGeometry = new THREE.TextGeometry('✖', {
-          font: font,
-          size: 0.25,
-          height: 0.02,
-          curveSegments: 12,
-        });
-        const crossMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
-        crossMark = new THREE.Mesh(crossGeometry, crossMaterial);
-        crossMark.position.set(-0.1, 0, -1);
-        crossMark.visible = false;
-        scene.add(crossMark);
-
-        // الدرع الأزرق (مجسم كرة شفافة)
-        const shieldGeometry = new THREE.SphereGeometry(0.25, 32, 32);
-        const shieldMaterial = new THREE.MeshBasicMaterial({color: 0x0000ff, opacity: 0.6, transparent: true});
-        shield = new THREE.Mesh(shieldGeometry, shieldMaterial);
-        shield.position.set(0, 0, -1);
-        shield.visible = false;
-        scene.add(shield);
-      });
-
-      controller = renderer.xr.getController(0);
-      controller.addEventListener('select', onSelect);
-      scene.add(controller);
-
-      // لو تجاهل المستخدم 5 ثواني، نبدل بالإشعار بدرع الحماية
-      ignoredTimeout = setTimeout(() => {
-        if(notificationShown) {
-          showShield();
-        }
-      }, 5000);
-
-      window.addEventListener('resize', onWindowResize, false);
-    }
-
-    function onWindowResize() {
-      camera.aspect = window.innerWidth/window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    function onSelect() {
-      if(notificationShown) {
-        showCrossMark();
+    function showScenario() {
+      if (scenarios.length === 0) {
+        document.getElementById("chatBox").innerHTML = '<div class="message">🎉 خلص الاختبار! أحسنت.</div>';
+        document.getElementById("nextBtn").style.display = 'none';
+        return;
       }
+      let randomIndex = Math.floor(Math.random() * scenarios.length);
+      let selected = scenarios.splice(randomIndex, 1)[0];
+      document.getElementById("chatBox").innerHTML =
+        '<div id="scenario" class="message">' + selected + '</div>' +
+        '<div class="options" id="optionsBox">' +
+        '<button onclick="handleChoice(true)">تجاهل الرسالة</button>' +
+        '<button onclick="handleChoice(false)">اضغط على الرابط</button>' +
+        '</div>';
     }
 
-    function showCrossMark() {
-      if (!notification || !crossMark || !shield) return;
-      notification.visible = false;
-      crossMark.visible = true;
-      shield.visible = false;
-      notificationShown = false;
-      clearTimeout(ignoredTimeout);
-      document.getElementById('info').textContent = '❌ ضغطت على الرابط! تهديد تم الكشف عنه.';
+    function handleChoice(isIgnore) {
+      const chatBox = document.getElementById("chatBox");
+      const optionsBox = document.getElementById("optionsBox");
+
+      optionsBox.style.display = 'none';
+
+      let reply = document.createElement("div");
+      reply.className = "reply";
+      reply.textContent = isIgnore ? "تجاهلت الرسالة" : "ضغطت على الرابط";
+      chatBox.appendChild(reply);
+
+      let systemMsg = document.createElement("div");
+      systemMsg.className = "message";
+      systemMsg.textContent = isIgnore ? "✔ صحيح! كانت محاولة احتيال." : "❌ خطأ! فتحت رابط احتيالي.";
+      chatBox.appendChild(systemMsg);
+
+      document.getElementById("nextBtn").style.display = 'inline-block';
     }
 
-    function showShield() {
-      if (!notification || !crossMark || !shield) return;
-      notification.visible = false;
-      crossMark.visible = false;
-      shield.visible = true;
-      notificationShown = false;
-      document.getElementById('info').textContent = '🛡️ تم تجاهل التهديد، الحماية فعالة.';
+    function loadNextScenario() {
+      document.getElementById("nextBtn").style.display = 'none';
+      showScenario();
     }
 
-    function animate() {
-      renderer.setAnimationLoop(render);
-    }
+    showScenario();
 
-    function render() {
-      renderer.render(scene, camera);
+    document.getElementById('arButton').addEventListener('click', function () {
+      window.open('interactive-ar.html', '_blank');
+    });
+  </script>
+</body>
+</html>
