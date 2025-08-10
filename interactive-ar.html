@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تجربة الواقع المعزز - CyberShield AR</title>
+  <style>
+    body, html {
+      margin: 0; padding: 0; height: 100vh; width: 100vw;
+      display: flex; justify-content: center; align-items: center;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: white;
+      flex-direction: column;
+    }
+    #startAR {
+      padding: 25px 50px;
+      font-size: 28px;
+      border: none;
+      border-radius: 12px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,123,255,0.7);
+      transition: background-color 0.3s ease;
+    }
+    #startAR:hover {
+      background-color: #0056b3;
+    }
+    #info {
+      margin-top: 20px;
+      font-size: 18px;
+      text-align: center;
+      max-width: 80vw;
+      line-height: 1.4;
+    }
+    canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1000;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<button id="startAR">ابدأ تجربة الواقع المعزز (Start AR)</button>
+<div id="info">اضغط على زر "ابدأ تجربة الواقع المعزز" للبدء.</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/webxr/ARButton.js"></script>
+
+<script>
+  let camera, scene, renderer;
+  let controller;
+  let started = false;
+
+  const startBtn = document.getElementById('startAR');
+  const info = document.getElementById('info');
+
+  startBtn.addEventListener('click', () => {
+    if (started) return;
+    started = true;
+
+    startBtn.style.display = 'none';
+    info.textContent = 'تم بدء تجربة الواقع المعزز. الرجاء الضغط على زر "تشغيل AR" الأزرق للمتابعة.';
+
+    init();
+    animate();
+  });
+
+  function init() {
+    scene = new THREE.Scene();
+
+    camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 20);
+
+    renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.xr.enabled = true;
+    document.body.appendChild(renderer.domElement);
+
+    // زر الـ AR (الثلاثي الأبعاد) يظهر تلقائياً، اضغط عليه عشان تبدأ الكاميرا وتطلب الإذن
+    document.body.appendChild(ARButton.createButton(renderer, {requiredFeatures: ['hit-test']}));
+
+    const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+    scene.add(light);
+
+    controller = renderer.xr.getController(0);
+    controller.addEventListener('select', () => {
+      alert('تم الضغط على الشاشة داخل تجربة الواقع المعزز!');
+    });
+    scene.add(controller);
+
+    window.addEventListener('resize', onWindowResize, false);
+  }
+
+  function onWindowResize() {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  function animate() {
+    renderer.setAnimationLoop(render);
+  }
+
+  function render() {
+    renderer.render(scene, camera);
+  }
+</script>
+
+</body>
+</html>
